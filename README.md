@@ -1,15 +1,15 @@
-# School Days REMASTERED 全结局分歧攻略
+# School Days REMASTERED 全エンディング分岐攻略
 
-《School Days REMASTERED》（スクールデイズ リマスター）的全结局攻略站点，部署于 https://school-days.jannchie.com 。
+『School Days REMASTERED』（スクールデイズ リマスター）の全エンディング攻略サイトです。https://school-days.jannchie.com で公開しています。
 
-- 22 个结局的逐步选项路线、每个选项的好感变化、各分歧点的判定条件
-- 一次打完全部结局的存档顺序
-- 49 个回想的全回收攻略
-- 各话标题流程图
+- 22 個のエンディングそれぞれの選択肢の手順、各選択肢による好感度の変化、各分岐の判定条件
+- 全エンディングを順に回収するためのセーブ手順
+- 49 個の回想のコンプリート手順
+- 各話タイトルのフローチャート
 - 中文・日本語・English
 
-数据通过逆向游戏程序取得，并用游戏原本的分歧代码重放验证。
+数値と分岐条件はゲームのプログラムを解析して取り出し、ゲーム本来の分岐処理で再生して確認しています。
 
-本仓库只包含构建好的静态文件，可直接用 GitHub Pages、Cloudflare Pages 等静态托管部署。
+このリポジトリにはビルド済みの静的ファイルのみが含まれており、GitHub Pages や Cloudflare Pages などの静的ホスティングにそのままデプロイできます。
 
-发现错误欢迎提 issue，或在 X（[@jannchie](https://x.com/jannchie)）联系。
+間違いを見つけたら issue を立てるか、X（[@jannchie](https://x.com/jannchie)）までご連絡ください。
