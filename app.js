@@ -129,18 +129,33 @@ const BUGT = {
 let L = "zh", TAB = "guide", SEL = 13;
 try { const s = localStorage.getItem("sd-lang"); if (s && I[s]) L = s; else if (!/^zh/i.test(navigator.language || "")) L = /^ja/i.test(navigator.language) ? "ja" : "en"; } catch (e) {}
 const PAGE = window.PAGE || null;
+(function autoLang() {
+  if (!PAGE || /bot|crawl|spider|slurp|preview|lighthouse|jsdom/i.test(navigator.userAgent || "") || navigator.webdriver) return;
+  let chosen = null;
+  try { chosen = localStorage.getItem("sd-lang-chosen"); } catch (e) { return; }
+  if (chosen) return;
+  const langs = (navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || ""]).map(x => String(x).toLowerCase());
+  let pref = "en";
+  for (const l of langs) { if (l.startsWith("ja")) { pref = "ja"; break; } if (l.startsWith("zh")) { pref = "zh"; break; } if (l.startsWith("en")) { pref = "en"; break; } }
+  try { localStorage.setItem("sd-lang-chosen", pref); } catch (e) {}
+  if (pref !== PAGE.lang) {
+    const b = pref === "ja" ? "/" : `/${pref}/`, t = PAGE.tab;
+    const to = t === "all" ? b + "save-order/" : t === "rules" ? b + "branches/" : t === "reps" ? b + "replays/" : PAGE.sel == null ? b : `${b}ending/${PAGE.sel + 1}/`;
+    location.replace(to + location.hash);
+  }
+})();
 if (PAGE) { L = PAGE.lang; TAB = PAGE.tab; if (PAGE.sel != null) SEL = PAGE.sel; }
 function href(lang, tab, sel) {
-  const b = lang === "zh" ? "/" : `/${lang}/`;
+  const b = lang === "ja" ? "/" : `/${lang}/`;
   if (tab === "all") return b + "save-order/";
   if (tab === "rules") return b + "branches/";
   if (tab === "reps") return b + "replays/";
   return sel == null ? b : `${b}ending/${sel + 1}/`;
 }
 function parsePath(path) {
-  const m = /^\/(?:(ja|en)\/)?(?:(save-order|branches|replays)\/|ending\/(\d+)\/)?$/.exec(path);
+  const m = /^\/(?:(zh|en)\/)?(?:(save-order|branches|replays)\/|ending\/(\d+)\/)?$/.exec(path);
   if (!m) return null;
-  return { lang: m[1] || "zh", tab: m[2] === "save-order" ? "all" : m[2] === "branches" ? "rules" : m[2] === "replays" ? "reps" : "guide", sel: m[3] ? +m[3] - 1 : null };
+  return { lang: m[1] || "ja", tab: m[2] === "save-order" ? "all" : m[2] === "branches" ? "rules" : m[2] === "replays" ? "reps" : "guide", sel: m[3] ? +m[3] - 1 : null };
 }
 let showLv = true, onlyPick = false, keyOnly = false;
 try { showLv = localStorage.getItem("sd-lv") !== "0"; onlyPick = localStorage.getItem("sd-op") === "1"; keyOnly = localStorage.getItem("sd-key") === "1"; } catch (e) {}
@@ -443,6 +458,7 @@ function render() {
   document.title = TAB === "guide" && pathSel ? `No.${SEL + 1} ${endName(SEL)} ${L === "en" ? "Guide" : "攻略"} | School Days REMASTERED` : TAB === "all" ? `${t.tabs[1]} | School Days REMASTERED` : TAB === "rules" ? `${t.tabs[3]} | School Days REMASTERED` : TAB === "reps" ? `${t.tabs[2]} | School Days REMASTERED` : "School Days REMASTERED " + t.title;
   $("#h1").textContent = t.title; $("#lede").innerHTML = INTRO[L].map(x => `<p>${esc(x)}</p>`).join(""); 
   document.querySelectorAll(".langs button").forEach(b => b.setAttribute("aria-pressed", b.dataset.l === L));
+  if (PAGE) document.querySelectorAll(".langs a[data-lang]").forEach(a => a.onclick = () => { try { localStorage.setItem("sd-lang-chosen", a.dataset.lang); } catch (e) {} });
   if (PAGE) document.querySelectorAll("#tabs a").forEach(a => a.onclick = ev => {
     if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.button) return;
     ev.preventDefault(); TAB = a.dataset.tab; pathSel = false; history.pushState(null, "", a.getAttribute("href")); render(); window.scrollTo(0, 0);
@@ -456,7 +472,7 @@ function render() {
   $("#endsum").textContent = t.pickEnd;
   $("#endbox").open = !(window.matchMedia && matchMedia("(max-width: 860px)").matches);
   $("#endnav").innerHTML = `<div class="nh">${esc(t.pickEnd)}</div>` + NAMES.map((_, n) => `<a href="${PAGE ? href(L, "guide", n) : "#e" + (n + 1)}" data-e="${n}"${TAB === "guide" && (pathSel || !PAGE) && n === SEL ? ' aria-current="page"' : ""}><span class="n">${String(n + 1).padStart(2, "0")}</span><span>${esc(endName(n))}</span></a>`).join("");
-  if (PAGE) $(".langs").innerHTML = [["zh", "中文"], ["ja", "日本語"], ["en", "English"]].map(([l, n]) => `<a href="${href(l, TAB, TAB === "guide" && pathSel ? SEL : null)}" hreflang="${l === "zh" ? "zh-CN" : l}" lang="${l === "zh" ? "zh-CN" : l}"${l === L ? ' aria-current="true"' : ""}>${n}</a>`).join("");
+  if (PAGE) $(".langs").innerHTML = [["ja", "日本語"], ["zh", "中文"], ["en", "English"]].map(([l, n]) => `<a data-lang="${l}" href="${href(l, TAB, TAB === "guide" && pathSel ? SEL : null)}" hreflang="${l === "zh" ? "zh-CN" : l}" lang="${l === "zh" ? "zh-CN" : l}"${l === L ? ' aria-current="true"' : ""}>${n}</a>`).join("");
   $("#main").innerHTML = TAB === "guide" ? viewGuide() : TAB === "all" ? viewAll() : TAB === "reps" ? viewReps() : viewRules();
   if ($("#opt-lv")) bindToggles();
   if ($("#flow")) {
